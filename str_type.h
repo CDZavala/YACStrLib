@@ -33,16 +33,22 @@ void str_free(str_t *str);
 #include <string.h>
 #include <stdio.h>
 
+static str_result str_grow(str_t *str, size_t new_cap)
+{
+    char *buf = realloc(str->buffer, new_cap);
+    if(!buf) return STR_FAILURE;
+    str->buffer = buf;
+    str->capacity = new_cap;
+
+    return STR_SUCCESS;
+}
+
 str_result str_set(str_t *str, const char *c_str)
 {
     size_t count = strlen(c_str);
     size_t capacity = count + 1;
-    if(capacity > str->capacity) {
-        char *buf = realloc(str->buffer, capacity);
-        if(!buf) return STR_FAILURE;
-        str->buffer = buf;
-        str->capacity = capacity;
-    }
+    if(capacity > str->capacity)
+        if(str_grow(str, capacity)) return STR_FAILURE;
 
     char *ptr = str->buffer;
     while((*ptr++ = *c_str++));
@@ -54,12 +60,8 @@ str_result str_set(str_t *str, const char *c_str)
 str_result str_set_n(str_t *str, const char *c_str, size_t count)
 {
     size_t capacity = count + 1;
-    if(capacity > str->capacity) {
-        char *buf = realloc(str->buffer, capacity);
-        if(!buf) return STR_FAILURE;
-        str->buffer = buf;
-        str->capacity = capacity;
-    }
+    if(capacity > str->capacity)
+        if(str_grow(str, capacity)) return STR_FAILURE;
 
     char *ptr = str->buffer;
     for(size_t i = 0; i < count; ++i) *ptr++ = *c_str++;
@@ -74,12 +76,8 @@ str_result str_cat(str_t *dest, const char *c_str1, const char *c_str2)
     size_t count1 = strlen(c_str1);
     size_t count2 = strlen(c_str2);
     size_t capacity = count1 + count2 + 1;
-    if(capacity > dest->capacity) {
-        char *buf = realloc(dest->buffer, capacity);
-        if(!buf) return STR_FAILURE;
-        dest->buffer = buf;
-        dest->capacity = capacity;
-    }
+    if(capacity > dest->capacity)
+        if(str_grow(dest, capacity)) return STR_FAILURE;
 
     char c;
     char *ptr = dest->buffer;
@@ -93,12 +91,8 @@ str_result str_cat(str_t *dest, const char *c_str1, const char *c_str2)
 str_result str_cat_n(str_t *dest, const char *c_str1, size_t count1, const char *c_str2, size_t count2)
 {
     size_t capacity = count1 + count2 + 1;
-    if(capacity > dest->capacity) {
-        char *buf = realloc(dest->buffer, capacity);
-        if(!buf) return STR_FAILURE;
-        dest->buffer = buf;
-        dest->capacity = capacity;
-    }
+    if(capacity > dest->capacity)
+        if(str_grow(dest, capacity)) return STR_FAILURE;
 
     char *ptr = dest->buffer;
     for(size_t i = 0; i < count1; ++i) *ptr++ = *c_str1++;
@@ -113,12 +107,8 @@ str_result str_append_s(str_t *str, const char *c_str)
 {
     size_t count = strlen(c_str);
     size_t new_cap = str->count + count + 1;
-    if(new_cap > str->capacity) {
-        char *buf = realloc(str->buffer, new_cap);
-        if(!buf) return STR_FAILURE;
-        str->buffer = buf;
-        str->capacity = new_cap;
-    }
+    if(new_cap > str->capacity) 
+        if(str_grow(str, new_cap)) return STR_FAILURE;
 
     char *ptr = str->buffer;
     ptr += str->count;
@@ -131,12 +121,8 @@ str_result str_append_s(str_t *str, const char *c_str)
 str_result str_append_s_n(str_t *str, const char *c_str, size_t count)
 {
     size_t new_cap = str->count + count + 1;
-    if(new_cap > str->capacity) {
-        char *buf = realloc(str->buffer, new_cap);
-        if(!buf) return STR_FAILURE;
-        str->buffer = buf;
-        str->capacity = new_cap;
-    }
+    if(new_cap > str->capacity)
+        if(str_grow(str, new_cap)) return STR_FAILURE;
 
     char *ptr = str->buffer;
     ptr += str->count;
@@ -149,12 +135,8 @@ str_result str_append_s_n(str_t *str, const char *c_str, size_t count)
 
 str_result str_append_c(str_t *str, char c)
 {
-    if(str->count >= str->capacity - 1) {
-        char *buf = realloc(str->buffer, str->capacity * 2);
-        if(!buf) return STR_FAILURE;
-        str->buffer = buf;
-        str->capacity *= 2;
-    }
+    if(str->count >= str->capacity - 1)
+        if(str_grow(str, str->capacity * 2)) return STR_FAILURE;
 
     str->buffer[str->count++] = c;
     str->buffer[str->count] = '\0';
