@@ -1,5 +1,5 @@
-#ifndef STRING_TYPE_H
-#define STRING_TYPE_H
+#ifndef INCLUDE_STRING_TYPE_H
+#define INCLUDE_STRING_TYPE_H
 
 #include <stddef.h>
 
@@ -25,9 +25,10 @@ str_result str_append_i(str_t *str, int i);
 str_result str_append_d(str_t *str, double d);
 void str_free(str_t *str);
 
-#endif // STRING_TYPE_H
+#endif // INCLUDE_STRING_TYPE_H
 
 #ifdef STRING_TYPE_IMPLEMENTATION
+#undef STRING_TYPE_IMPLEMENTATION
 
 #include <stdlib.h>
 #include <string.h>
